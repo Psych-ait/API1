@@ -1,6 +1,9 @@
 import './index.scss';
+import LateralMenu from '../components/menuComponent/menu';
+import AccountBar from '../components/accountBar/accountBar';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+
 
 export default function CarsControl() {
   const [tipos, setTipos] = useState([]);
@@ -11,26 +14,38 @@ export default function CarsControl() {
   const [placa, setPlaca] = useState('');
   const [ano, setAno] = useState('');
 
+  const [busca, setBusca] = useState('');
+  const [listaVeiculos, setListaVeiculos] = useState([]);
+
   const [erro, setErro] = useState('');
+
+
+
+  async function buscarVeiculos() {
+    let r = await axios.get('http://localhost:5000/veiculo?busca=' + busca);
+    setListaVeiculos(r.data);
+  }
+
 
 
   async function salvar() {
     try {
-        let veiculo = {
-            idTipoVeiculo: tipoSelecionado,
-            modelo: modelo,
-            marca: marca,
-            ano: ano,
-            placa: placa
+
+      let veiculo = {
+        idTipoVeiculo: tipoSelecionado,
+        modelo: modelo,
+        marca: marca,
+        placa: placa,
+        ano: ano
       }
   
       let r = await axios.post('http://localhost:5000/veiculo', veiculo);
-      alert('Veículo cadastrado!');
-
+      alert('Veículo cadastrado com sucesso!');
+        
     } catch (err) {
-      setErro(err.response.data.erro);
+      setErro(err.response.data.erro);  
     }
-    
+      
   }
 
 
@@ -42,34 +57,37 @@ export default function CarsControl() {
   useEffect(() => {
     //
     listarTipos();
+    //
   }, [])
   
 
 
   return (
     <div className='CarsMain'>
+      <LateralMenu />
       <div className='CarContent'>
+        <AccountBar />
         <main>
           <div className='Title'>
             <h4>ÁREA ADMINISTRATIVA</h4>
-            <h1>Controle de Clientes</h1>
+            <h1>Controle de Veículos</h1>
           </div>
 
           <section className='newCar'>
             <h1> Novo Veículo </h1>
-            <h2> {erro}</h2>
+            <h2>{erro}</h2>
             <span >
-              <label>Nome</label>
+              <label>Tipo Veículo</label>
               
               <select id="veiculo" name="veiculo" value={tipoSelecionado} onChange={e => setTipoSelecionado(e.target.value)} >
-                <option value="0">Selecione</option>
-
+                <option value={0}> Selecione </option>
                 {tipos.map(item =>
                   <option value={item.id}> {item.tipo} </option>  
                 )}
+      
               </select>
-
             </span>
+
 
             <span >
               <label>Modelo</label>
@@ -102,8 +120,8 @@ export default function CarsControl() {
             <span >
               <label>Modelo, Marca, Placa</label>
               <div className=''  >
-                <input type='text' />
-                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type='text' value={busca} onChange={e => setBusca(e.target.value)} />
+                <i class="fa-solid fa-magnifying-glass" onClick={buscarVeiculos}></i>
               </div>
             </span>
             <table>
@@ -125,22 +143,20 @@ export default function CarsControl() {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>HB20</td>
-                  <td>Hyunday</td>
-                  <td>2016</td>
-                  <td>Carro</td>
-                  <td>abc-123</td>
-                  <td className='btns' style={{ display: 'flex', height: 20 }}><i class="fa-regular fa-pen-to-square"></i> <i class="fa-solid fa-delete-left"></i></td>
-                </tr>
-                <tr>
-                  <td>Prius</td>
-                  <td>Toyota</td>
-                  <td>2020</td>
-                  <td>carro</td>
-                  <td>abc-545</td>
-                  <td className='btns' style={{ display: 'flex', height: 20 }}><i class="fa-regular fa-pen-to-square"></i> <i class="fa-solid fa-delete-left"></i></td>
-                </tr>
+                {listaVeiculos.map(item =>
+                  <tr>
+                    <td>{item.modelo}</td>
+                    <td>{item.marca}</td>
+                    <td>{item.ano}</td>
+                    <td>{item.tipo}</td>
+                    <td>{item.placa}</td>
+                    <td className='btns' style={{ display: 'flex', height: 20 }}>
+                      <i class="fa-regular fa-pen-to-square"></i>
+                      <i class="fa-solid fa-delete-left"></i>
+                    </td>
+                  </tr>  
+                )}
+                
               </tbody>
             </table>
 
