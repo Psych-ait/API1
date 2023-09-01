@@ -16,12 +16,12 @@ export default function CarsControl() {
 
   async function salvar() {
     try {
-      let veiculo = {
-        idTipoVeiculo: tipoSelecionado,
-        modelo: modelo,
-        marca: marca,
-        ano: ano,
-        placa: placa
+        let veiculo = {
+            idTipoVeiculo: tipoSelecionado,
+            modelo: modelo,
+            marca: marca,
+            ano: ano,
+            placa: placa
       }
   
       let r = await axios.post('http://localhost:5000/veiculo', veiculo);
