@@ -33,6 +33,4 @@ endpoints.post('/veiculo', async (req, resp) => {
   }
 })
 
-
-
 export default endpoints;

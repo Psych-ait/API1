@@ -1,62 +1,82 @@
 import {conexao} from "./connection.js";
 
-export async function inserir(veiculo){
-    let sql =`insert into TB_veiculo 
-               (id_tipo_Veiculo,
-                ds_modelo,
-                ds_marca,
-                nr_ano,
-                ds_placa  
-                )
-        Values (?,?,?,?,?)
-    `;
 
-    let resp = await conexao.query(sql, [
-        veiculo.idTipoVeiculo,
-        veiculo.modelo,
-        veiculo.marca,
-        veiculo.ano,
-        veiculo.placa
-    ]);
-    let dados= resp[0];
+export async function inserir(veiculo) {
+  let comando = `
+      insert into tb_veiculo (id_tipo_veiculo, ds_modelo, ds_marca, nr_ano, ds_placa) 
+                      values (?, ?, ?, ?, ?)
+  `
 
-    veiculo.id= dados.insertId;
-    return dados;
-};
+  let [resp] = await conexao.query(comando,
+    [
+      veiculo.idTipoVeiculo,
+      veiculo.modelo,
+      veiculo.marca,
+      veiculo.ano,
+      veiculo.placa
+    ])
+  
+  veiculo.id = resp.insertId;
+  return veiculo;
+}
 
 export async function consultar(busca) {
-    try {
-      let comando = `
-        SELECT
-          ve.id AS id,
-          tv.id_tipo_veiculo AS idTipoVeiculo,
-          tv.ds_tipo AS tipo,
-          ve.ds_modelo AS modelo,
-          ve.ds_marca AS marca,
-          ve.nr_ano AS ano,
-          ve.ds_placa AS placa
-        FROM
-          tb_veiculo AS ve
-        INNER JOIN
-          tb_tipo_veiculo AS tv ON tv.id_tipo_veiculo = ve.id_tipo_veiculo
-        WHERE
-          ve.ds_modelo LIKE ? OR
-          ve.ds_marca LIKE ? OR
-          ve.ds_placa LIKE ?
-        ORDER BY
-          ve.id
-      `;
-  
-      let [resp] = await con.query(comando, [`%${busca}%`, `%${busca}%`, `%${busca}%`]);
-  
-      return resp;
+  let comando = `
+      select ve.id_veiculo			    as id,
+              tv.id_tipo_veiculo		as idTipoVeiculo,
+              tv.ds_tipo				    as tipo,
+              ve.ds_modelo				  as modelo,
+              ve.ds_marca				    as marca,
+              ve.nr_ano				      as ano,
+              ve.ds_placa				    as placa
+        from tb_veiculo				      as ve
+        inner join tb_tipo_veiculo	as tv  ON tv.id_tipo_veiculo = ve.id_tipo_veiculo
+        where ds_modelo like ?
+           or ds_marca  like ?
+           or ds_placa  like ?
+        order 
+          by id_veiculo
+  `
 
-    } 
-    catch (erro) {
-      console.error("Erro ao executar a consulta:", erro);
-      throw erro;
-    }
-};
+  let [dados] = await con.query(comando,
+    [
+      '%' + busca + '%',
+      '%' + busca + '%',
+      '%' + busca + '%'
+    ])
+  return dados;
+}
 
+export async function alterar(id, veiculo) {
+  let comando = `
+      update tb_veiculo 
+         set id_tipo_veiculo = ?,
+             ds_modelo       = ?,
+             ds_marca        = ?,
+             nr_ano          = ?,
+             ds_placa        = ?
+       where id_veiculo      = ?
+  `
 
+  let [resp] = await conexao.query(comando, 
+    [
+      veiculo.idTipoVeiculo,
+      veiculo.modelo,
+      veiculo.marca,
+      veiculo.ano,
+      veiculo.placa,
+      id
+    ])
   
+  return resp.affectedRows;
+}
+
+export async function deletar(id) {
+  let comando = `
+      delete from tb_veiculo 
+            where id_veiculo = ?
+  `
+
+  let [resp] = await conexao.query(comando, [id]);
+  return resp.affectedRows;
+}
