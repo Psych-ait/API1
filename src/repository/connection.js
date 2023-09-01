@@ -8,5 +8,5 @@ const conexao = await mysql.createConnection({
     
 })
 
-console.log('BD Conectado Manninho !');
+console.log('BD Conectado!');
 export  {conexao};
